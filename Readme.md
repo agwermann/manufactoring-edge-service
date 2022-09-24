@@ -25,3 +25,12 @@ python3 main.py <broker_url> <broker_port> <response_topic>
 docker build -t dev.local/edge-service:0.1 .
 docker compose up -d
 ```
+
+```
+docker run \
+    --detach \
+    --publish 8080:8080 \
+    --name edge-service \
+    --rm \
+    dev.local/edge-service:0.1
+```

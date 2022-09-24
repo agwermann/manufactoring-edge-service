@@ -56,6 +56,8 @@ def extract_sensor_data(payload):
 @app.route("/score", methods=["POST"])
 def score():
 
+    start_time = datetime.datetime.now()
+
     payload = request.get_json()
     app.logger.info(payload)
     
@@ -63,13 +65,18 @@ def score():
     
     result = mlp_model.predict([data])
 
+    end_time = datetime.datetime.now()
+
     app.logger.info("Predict Result: " + str(result[0]))
 
     # Return 204 - No-content
-    return jsonify({"result": int(result[0])})
+    return jsonify({"result": int(result[0]), "processing_time": str(end_time - start_time)})
 
 @app.route("/", methods=["POST"])
 def home():
+
+    start_time = datetime.datetime.now()
+
     cloud_event = CloudEventService()
     event = cloud_event.receive_message(request)
 
@@ -98,6 +105,10 @@ def home():
         # f"Now: {now} -"
         f"Latency: {latency}"
     )
+
+    end_time = datetime.datetime.now()
+
+    event.data["processing_time"] = str(end_time - start_time)
 
     mqtt_client.publish(json.dumps(event.data))
 

@@ -9,7 +9,7 @@ spec:
       name: edge-service-v1
       annotations:
         autoscaling.knative.dev/target: "1"
-        autoscaling.knative.dev/maxScale: "1"
+        autoscaling.knative.dev/maxScale: "10"
     spec:
       containers:
       - name: edge-service
