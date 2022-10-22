@@ -13,10 +13,14 @@ if(len(sys.argv) < 2):
     print('Missing argument: please inform the broker address, port and topic')
     exit()
 
-#broker_address = "mosquitto"
 broker_address = str(sys.argv[1])
 broker_port = int(sys.argv[2])
 topic = str(sys.argv[3])
+
+if(len(sys.argv) > 4):
+    n_iteration = int(sys.argv[4])
+else:
+    n_iteration = 100
 
 source = "edge-service"
 message_type = "edge-service-message"
@@ -62,8 +66,9 @@ def score():
     app.logger.info(payload)
     
     data = extract_sensor_data(payload)
-    
-    result = mlp_model.predict([data])
+
+    for _ in range(0, n_iteration):
+        result = mlp_model.predict([data])
 
     end_time = datetime.datetime.now()
 
@@ -82,7 +87,8 @@ def home():
 
     data = extract_sensor_data(event.data['sensor'])
     
-    result = mlp_model.predict([data])
+    for _ in range(0, n_iteration):
+        result = mlp_model.predict([data])
 
     app.logger.info("Predict Result: " + str(result[0]))
 
