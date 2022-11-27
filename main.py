@@ -4,6 +4,7 @@ import json
 import logging
 import datetime
 import pickle
+import requests
 from flask import Flask, request, jsonify
 from modules.cloudevent import CloudEventService
 from modules.mqtt import MQTTClient
@@ -13,12 +14,11 @@ if(len(sys.argv) < 2):
     print('Missing argument: please inform the broker address, port and topic')
     exit()
 
-broker_address = str(sys.argv[1])
-broker_port = int(sys.argv[2])
-topic = str(sys.argv[3])
+integrator_address = str(sys.argv[1])
+integrator_port = int(sys.argv[2])
 
-if(len(sys.argv) > 4):
-    n_iteration = int(sys.argv[4])
+if(len(sys.argv) > 3):
+    n_iteration = int(sys.argv[3])
 else:
     n_iteration = 100
 
@@ -26,10 +26,6 @@ source = "edge-service"
 message_type = "edge-service-message"
 data = { "edge-service": "edge-service-data" }
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
-
-#broker_address = "192.168.1.195"
-#broker_port = 1883
-#topic = "mytopic-response"
 
 app = Flask(__name__)
 
@@ -116,13 +112,11 @@ def home():
 
     event.data["processing_time"] = str(end_time - start_time)
 
-    mqtt_client.publish(json.dumps(event.data))
-
+    requests.post(integrator_address, event.data)
+    
     # Return 204 - No-content
     return "", 204
 
 if __name__ == "__main__":
-    mqtt_client = MQTTClient(client_id=client_id, broker=broker_address, port=broker_port, topic=topic)
-    mqtt_client.connect_mqtt()
     app.logger.info("Starting up server...")
     app.run(host='0.0.0.0', port=8080)
