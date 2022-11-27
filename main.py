@@ -17,7 +17,7 @@ if(len(sys.argv) < 2):
 integrator_address = str(sys.argv[1])
 integrator_port = int(sys.argv[2])
 
-if(len(sys.argv) > 3):
+if(len(sys.argv) > 2):
     n_iteration = int(sys.argv[3])
 else:
     n_iteration = 100
