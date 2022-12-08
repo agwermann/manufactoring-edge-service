@@ -1,5 +1,5 @@
 import requests
-from cloudevents.http import CloudEvent, to_structured, from_http
+from cloudevents.http import CloudEvent, from_http, to_binary
 
 class CloudEventService():
 
@@ -17,7 +17,7 @@ class CloudEventService():
         attributes = self.build_attributes(message_type, source_address)
 
         event = CloudEvent(attributes, data)
-        headers, body = to_structured(event)
+        headers, body = to_binary(event)
 
         requests.post(target_address, headers=headers, data=body)
         print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")

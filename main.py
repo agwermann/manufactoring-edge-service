@@ -4,10 +4,8 @@ import json
 import logging
 import datetime
 import pickle
-import requests
 from flask import Flask, request, jsonify
 from modules.cloudevent import CloudEventService
-from modules.mqtt import MQTTClient
 
 print(sys.argv)
 if(len(sys.argv) < 2):
@@ -21,6 +19,8 @@ if(len(sys.argv) > 2):
     n_iteration = int(sys.argv[2])
 else:
     n_iteration = 100
+
+integrator_address = integrator_address + ":" + str(integrator_port)
 
 source = "edge-service"
 message_type = "edge-service-message"
@@ -88,23 +88,13 @@ def home():
 
     app.logger.info("Predict Result: " + str(result[0]))
 
-    # Process event
-
-    # app.logger.info(
-    #    f"Found {event['id']} from {event['source']} with type "
-    #    f"{event['type']} and specversion {event['specversion']}"
-    #)
-
     now = datetime.datetime.now()
     sent_datetime = datetime.datetime.strptime(event.data['timestamp'], "%Y-%m-%dT%H:%M:%S.%f")
     latency = str(now - sent_datetime)
 
     app.logger.info(
         f"Event Priority: {event.data['priority']} | "
-        # f"Data Content: {event.data['message']} bytes | "
         f"Data Length: {len(event.data['message'])} bytes | "
-        # f"Sent time: {sent_datetime} -"
-        # f"Now: {now} -"
         f"Latency: {latency}"
     )
 
@@ -112,11 +102,12 @@ def home():
 
     event.data["processing_time"] = str(end_time - start_time)
 
-    requests.post(integrator_address, event.data)
+    response_event = CloudEventService()
+    response_event.send_message(integrator_address, "com.example.sampletype1", "https://example.com/event-producer", event.data)
     
     # Return 204 - No-content
     return "", 204
 
 if __name__ == "__main__":
     app.logger.info("Starting up server...")
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8081)
