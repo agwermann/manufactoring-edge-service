@@ -1,0 +1,1 @@
+docker build -t dev.local/edge-service:0.1 .
